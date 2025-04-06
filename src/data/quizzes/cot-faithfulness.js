@@ -1,4 +1,13 @@
-// quizData.js
+// cot-faithfulness.js - Quiz data for "Reasoning Models Don't Always Say What They Think" paper
+
+export const quizMetadata = {
+  id: "cot-faithfulness",
+  title: "Chain-of-Thought Faithfulness Quiz",
+  description: "Test your intuitions about AI safety and chain-of-thought reasoning based on the \"Reasoning Models Don't Always Say What They Think\" paper.",
+  author: "Anthropic",
+  publishedDate: "2024",
+};
+
 export const methodologySummary = `
   The paper evaluates chain-of-thought (CoT) faithfulness in language models by examining whether models explicitly mention important factors that influence their decisions. 
   
@@ -93,4 +102,4 @@ export const questions = [
     explanation: "RL only increases verbalization on 1 out of 6 hint types. If the model initialization is unfaithful on a reward hack, RL on data with that hack leads to models that tend not to verbalize the hacks.",
     context: "The researchers compared how often models verbalized using reward hacks before and after reinforcement learning training. A key question was whether continued exposure to environments with reward hacks would make models more likely to acknowledge these hacks in their explanations. This has implications for whether monitoring will become more or less effective as models receive more training."
   }
-];
+]; 

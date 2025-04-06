@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, ArrowRight, RotateCcw, ChevronDown, ChevronUp, Info } from 'lucide-react';
-// Import quiz data from external file
-import { questions, methodologySummary } from './quizData';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { AlertCircle, CheckCircle2, ArrowRight, RotateCcw, ChevronDown, ChevronUp, Info, Home } from 'lucide-react';
+import { loadQuizData, getQuizById } from '../data/quizRegistry';
 
 const Quiz = () => {
+  const { quizId } = useParams();
+  const navigate = useNavigate();
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [predictions, setPredictions] = useState({});
   const [showResults, setShowResults] = useState(false);
@@ -13,31 +16,50 @@ const Quiz = () => {
   const [questionStatus, setQuestionStatus] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [quizData, setQuizData] = useState({ questions: [], methodologySummary: '' });
+  const [quizInfo, setQuizInfo] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Simulate loading quiz data from a file
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        // In a real application, you would fetch from an API or load a file
-        // For this example, we're simulating a network request with a timeout
-        setTimeout(() => {
-          setQuizData({ questions, methodologySummary });
+        setIsLoading(true);
+        
+        // Validate quiz ID exists in registry
+        const quizMeta = getQuizById(quizId);
+        if (!quizMeta) {
+          setError(`Quiz with ID '${quizId}' not found`);
           setIsLoading(false);
-        }, 800);
-
-        // If you were using a real API, you'd do something like:
-        // const response = await fetch('/api/quiz-data');
-        // const data = await response.json();
-        // setQuizData(data);
-        // setIsLoading(false);
+          return;
+        }
+        
+        setQuizInfo(quizMeta);
+        
+        // Load quiz data
+        const data = await loadQuizData(quizId);
+        setQuizData({
+          questions: data.questions,
+          methodologySummary: data.methodologySummary
+        });
+        
+        setIsLoading(false);
       } catch (error) {
         console.error("Error loading quiz data:", error);
+        setError(`Failed to load quiz: ${error.message}`);
         setIsLoading(false);
       }
     };
 
+    // Reset state when quiz ID changes
+    setCurrentQuestionIndex(0);
+    setPredictions({});
+    setShowResults(false);
+    setCompleted(false);
+    setQuestionStatus({});
+    setExpandedContexts({});
+    setError(null);
+    
     fetchQuizData();
-  }, []);
+  }, [quizId]);
   
   const handleOptionSelect = (option) => {
     if (questionStatus[currentQuestionIndex]) return; // Prevent changing answer after submission
@@ -91,6 +113,20 @@ const Quiz = () => {
     });
   };
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center max-w-3xl mx-auto p-6 bg-red-50 rounded-lg shadow-md">
+        <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-red-700 mb-2">Error Loading Quiz</h2>
+        <p className="text-red-700 mb-6">{error}</p>
+        <Link to="/" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
+          <Home className="h-4 w-4 mr-2" /> Back to Quiz Selection
+        </Link>
+      </div>
+    );
+  }
+
   // Show loading state
   if (isLoading) {
     return (
@@ -106,8 +142,15 @@ const Quiz = () => {
 
   return (
     <div className="flex flex-col space-y-6 max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center text-gray-800">Chain-of-Thought Faithfulness Prediction Quiz</h1>
-      <p className="text-center text-gray-600">Test your intuitions about AI safety and chain-of-thought reasoning based on the "Reasoning Models Don't Always Say What They Think" paper.</p>
+      <div className="flex justify-between items-center">
+        <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center">
+          <Home className="h-4 w-4 mr-1" /> Back to Quizzes
+        </Link>
+        <h1 className="text-2xl font-bold text-center text-gray-800">{quizInfo?.title}</h1>
+        <div className="w-6"></div> {/* Empty div for flex layout balance */}
+      </div>
+      
+      <p className="text-center text-gray-600">{quizInfo?.description}</p>
       
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <div 
@@ -268,12 +311,20 @@ const Quiz = () => {
             </div>
           </div>
           
-          <button
-            onClick={handleReset}
-            className="mx-auto flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" /> Try Again
-          </button>
+          <div className="flex justify-between">
+            <Link 
+              to="/"
+              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+            >
+              <Home className="mr-2 h-4 w-4" /> All Quizzes
+            </Link>
+            <button
+              onClick={handleReset}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" /> Try Again
+            </button>
+          </div>
         </div>
       )}
     </div>
