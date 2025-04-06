@@ -1,12 +1,41 @@
-# React + Vite
+# Predict First 🔮
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Test your intuitions about AI research papers **before** reading them!
 
-Currently, two official plugins are available:
+## Why This Exists
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Ever wondered if your intuitions about AI progress, risks, and capabilities align with the actual research? Now you can find out! Take a quiz on a paper's findings *before* you read it to see how good your predictions really are.
 
-## Expanding the ESLint configuration
+No peeking at the paper first—that defeats the whole purpose. How calibrated are your AI safety intuitions? Are you overly optimistic? Too doom-y? Find out now!
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Features
+
+- 🧠 Test your intuitions against real research findings
+- 📊 Multiple quizzes covering different papers and topics
+- 🔄 Share quizzes with your AI-curious friends
+- 📱 Works on mobile (great for reading on the go!)
+
+## Add Your Own Papers
+
+Got a paper whose findings you want to quiz people on? Adding a new quiz is easy:
+
+1. Fork the repo
+2. Create a quiz file in `src/data/quizzes/`
+3. Add it to the registry
+4. Submit a PR
+
+## Development
+
+For the nerds who want to tinker:
+
+```bash
+# Get it running
+npm install
+npm run dev
+
+# That's it! The rest is just standard React stuff.
+```
+
+Built with React, Tailwind, and Vite. No fancy backends or complicated setups.
+
+Happy predicting! 🚀
