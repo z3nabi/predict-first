@@ -6,22 +6,39 @@
 @layer components {
   .quiz-option {
     @apply p-3 rounded-md cursor-pointer transition-colors;
+    color: #213547; /* Hard-coded text color */
   }
   
   .quiz-option.selected {
-    @apply bg-blue-100 border border-blue-400;
+    @apply border;
+    background-color: #dbeafe; /* Hard-coded bg color */
+    border-color: #60a5fa; /* Hard-coded border color */
+    color: #213547; /* Hard-coded text color */
   }
   
   .quiz-option.correct {
-    @apply bg-green-100 border-green-500;
+    @apply border;
+    background-color: #dcfce7; /* Hard-coded bg color */
+    border-color: #22c55e; /* Hard-coded border color */
+    color: #213547; /* Hard-coded text color */
   }
   
   .quiz-option.incorrect {
-    @apply bg-red-100 border-red-500;
+    @apply border;
+    background-color: #fee2e2; /* Hard-coded bg color */
+    border-color: #ef4444; /* Hard-coded border color */
+    color: #213547; /* Hard-coded text color */
   }
   
   .quiz-option.default {
-    @apply bg-gray-100 hover:bg-gray-200 border border-gray-200;
+    @apply border;
+    background-color: #f3f4f6; /* Hard-coded bg color */
+    border-color: #e5e7eb; /* Hard-coded border color */
+    color: #213547; /* Hard-coded text color */
+  }
+  
+  .quiz-option.default:hover {
+    background-color: #e5e7eb; /* Hard-coded hover bg color */
   }
 }
 
@@ -30,9 +47,10 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* We're removing the dynamic color-scheme and setting fixed colors */
+  /* color-scheme: light dark; */
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -55,11 +73,14 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #ffffff;
+  color: #213547;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: #213547;
 }
 
 button {
@@ -69,7 +90,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
+  color: #213547;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -81,7 +103,8 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
+/* Remove media query for color scheme since we're hard-coding colors */
+/* @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
@@ -92,4 +115,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
+} */

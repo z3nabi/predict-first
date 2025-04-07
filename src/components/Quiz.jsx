@@ -170,18 +170,19 @@ const Quiz = () => {
       
       {!showResults ? (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm" style={{ backgroundColor: '#ffffff', color: '#213547' }}>
             <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {quizData.questions.length}</span>
-              <span className="text-sm font-medium text-blue-600">{Object.keys(questionStatus).length} answered</span>
+              <span className="text-sm" style={{ color: '#6b7280' }}>Question {currentQuestionIndex + 1} of {quizData.questions.length}</span>
+              <span className="text-sm font-medium" style={{ color: '#2563eb' }}>{Object.keys(questionStatus).length} answered</span>
             </div>
             
-            <h2 className="text-lg font-medium mb-2">{currentQuestion.question}</h2>
+            <h2 className="text-lg font-medium mb-2" style={{ color: '#213547' }}>{currentQuestion.question}</h2>
             
             {currentQuestion.context && (
               <div className="mb-4">
                 <div 
-                  className="flex items-center text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                  className="flex items-center text-sm cursor-pointer" 
+                  style={{ color: '#6b7280' }}
                   onClick={() => toggleContext(currentQuestionIndex)}
                 >
                   <Info className="h-4 w-4 mr-1" /> 
@@ -193,7 +194,7 @@ const Quiz = () => {
                 </div>
                 
                 {expandedContexts[currentQuestionIndex] && (
-                  <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700">
+                  <div className="mt-2 p-3 rounded-md text-sm" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb', color: '#374151', border: '1px solid #e5e7eb' }}>
                     {currentQuestion.context}
                   </div>
                 )}
@@ -227,20 +228,28 @@ const Quiz = () => {
             </div>
             
             {questionStatus[currentQuestionIndex] && (
-              <div className={`mt-4 p-4 rounded-md ${predictions[currentQuestionIndex] === currentQuestion.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '1rem', 
+                borderRadius: '0.375rem', 
+                backgroundColor: predictions[currentQuestionIndex] === currentQuestion.correctAnswer ? '#dcfce7' : '#fee2e2',
+                borderColor: predictions[currentQuestionIndex] === currentQuestion.correctAnswer ? '#86efac' : '#fecaca',
+                borderWidth: '1px',
+                color: '#213547'
+              }}>
                 <div className="flex items-start gap-2">
                   {predictions[currentQuestionIndex] === currentQuestion.correctAnswer ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#22c55e' }} />
                   ) : (
-                    <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#ef4444' }} />
                   )}
                   <div>
-                    <p className="font-medium mb-1">
+                    <p className="font-medium mb-1" style={{ color: '#213547' }}>
                       {predictions[currentQuestionIndex] === currentQuestion.correctAnswer 
                         ? "Correct!" 
                         : `Incorrect. The correct answer is: ${currentQuestion.correctAnswer}`}
                     </p>
-                    <p className="text-sm">{currentQuestion.explanation}</p>
+                    <p className="text-sm" style={{ color: '#213547' }}>{currentQuestion.explanation}</p>
                   </div>
                 </div>
               </div>
@@ -251,7 +260,8 @@ const Quiz = () => {
             {currentQuestionIndex > 0 && (
               <button
                 onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
+                className="px-4 py-2 rounded-md" 
+                style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
               >
                 Previous
               </button>
@@ -261,18 +271,21 @@ const Quiz = () => {
               <button
                 onClick={handleSubmitAnswer}
                 disabled={!predictions[currentQuestionIndex]}
-                className={`px-4 py-2 rounded-md ${
-                  !predictions[currentQuestionIndex] 
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.375rem',
+                  backgroundColor: !predictions[currentQuestionIndex] ? '#e5e7eb' : '#2563eb',
+                  color: !predictions[currentQuestionIndex] ? '#9ca3af' : '#ffffff',
+                  cursor: !predictions[currentQuestionIndex] ? 'not-allowed' : 'pointer'
+                }}
               >
                 Submit Answer
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center"
+                className="px-4 py-2 rounded-md flex items-center"
+                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
               >
                 {currentQuestionIndex < quizData.questions.length - 1 ? 'Next Question' : 'See Summary'} 
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -282,28 +295,28 @@ const Quiz = () => {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold mb-4">Your Results</h2>
-            <p className="text-lg mb-6">You scored <span className="font-bold">{calculateScore()}</span> out of {quizData.questions.length} questions.</p>
+          <div className="p-6 rounded-lg shadow-sm" style={{ backgroundColor: '#ffffff', color: '#213547' }}>
+            <h2 className="text-xl font-bold mb-4" style={{ color: '#213547' }}>Your Results</h2>
+            <p className="text-lg mb-6" style={{ color: '#213547' }}>You scored <span className="font-bold">{calculateScore()}</span> out of {quizData.questions.length} questions.</p>
             
             <div className="space-y-6">
               {quizData.questions.map((q, idx) => (
-                <div key={idx} className="border-b pb-4 last:border-b-0">
+                <div key={idx} className="border-b pb-4 last:border-b-0" style={{ borderColor: '#e5e7eb' }}>
                   <div className="flex items-start gap-2 mb-2">
                     {predictions[idx] === q.correctAnswer ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#22c55e' }} />
                     ) : (
-                      <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#ef4444' }} />
                     )}
                     <div>
-                      <h3 className="font-medium">{q.question}</h3>
-                      <p className="text-sm mt-1">
-                        Your answer: <span className={`font-medium ${predictions[idx] === q.correctAnswer ? 'text-green-600' : 'text-red-600'}`}>{predictions[idx] || "No answer"}</span>
+                      <h3 className="font-medium" style={{ color: '#213547' }}>{q.question}</h3>
+                      <p className="text-sm mt-1" style={{ color: '#213547' }}>
+                        Your answer: <span className="font-medium" style={{ color: predictions[idx] === q.correctAnswer ? '#16a34a' : '#dc2626' }}>{predictions[idx] || "No answer"}</span>
                       </p>
-                      <p className="text-sm mt-1">
-                        Correct answer: <span className="font-medium text-green-600">{q.correctAnswer}</span>
+                      <p className="text-sm mt-1" style={{ color: '#213547' }}>
+                        Correct answer: <span className="font-medium" style={{ color: '#16a34a' }}>{q.correctAnswer}</span>
                       </p>
-                      <p className="text-sm mt-2 text-gray-700">{q.explanation}</p>
+                      <p className="text-sm mt-2" style={{ color: '#374151' }}>{q.explanation}</p>
                     </div>
                   </div>
                 </div>
@@ -314,13 +327,15 @@ const Quiz = () => {
           <div className="flex justify-between">
             <Link 
               to="/"
-              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              className="flex items-center px-4 py-2 rounded-md"
+              style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
             >
               <Home className="mr-2 h-4 w-4" /> All Quizzes
             </Link>
             <button
               onClick={handleReset}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="flex items-center px-4 py-2 rounded-md"
+              style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
             >
               <RotateCcw className="mr-2 h-4 w-4" /> Try Again
             </button>
