@@ -15,14 +15,28 @@ No peeking at the paper first—that defeats the whole purpose. How calibrated a
 - 🔄 Share quizzes with your AI-curious friends
 - 📱 Works on mobile (great for reading on the go!)
 
-## Add Your Own Papers
+## Generate Quizzes with Claude
 
-Got a paper whose findings you want to quiz people on? Adding a new quiz is easy:
+Want to add a quiz for a new paper? We've included a script to auto-generate quizzes using Claude:
 
-1. Fork the repo
-2. Create a quiz file in `src/data/quizzes/`
-3. Add it to the registry
-4. Submit a PR
+```bash
+# First, install dependencies
+cd scripts
+pip install -r requirements.txt
+
+# Set up your API key in one of these ways:
+# 1. Create a .env file (in project root, scripts dir, or current dir)
+cp .env.example .env
+# Edit .env with your API key
+
+# 2. Or provide the API key directly via command line:
+./generate_quiz.py --url "..." --quiz-id "..." --api-key "sk-ant-..."
+
+# Generate a quiz from a paper URL
+./generate_quiz.py --pdf-url "https://arxiv.org/pdf/2502.04675" --quiz-id "recursive-self-critique"
+```
+
+Once generated, you'll need to add the quiz to the registry in `src/data/quizRegistry.js`.
 
 ## Development
 

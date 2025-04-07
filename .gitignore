@@ -23,3 +23,17 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Environment files with secrets
+.env
+scripts/.env
+*.env
+
+# Python script related
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+ENV/
