@@ -11,9 +11,11 @@ No peeking at the paper first—that defeats the whole purpose. How calibrated a
 ## Features
 
 - 🧠 Test your intuitions against real research findings
+- 🤖 Generate quizzes on-demand for any paper with Claude 3.7
 - 📊 Multiple quizzes covering different papers and topics
 - 🔄 Share quizzes with your AI-curious friends
 - 📱 Works on mobile (great for reading on the go!)
+
 
 ## Generate Quizzes with Claude
 
@@ -49,6 +51,20 @@ npm run dev
 
 # That's it! The rest is just standard React stuff.
 ```
+
+## Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```
+# Claude API key for paper quiz generation (optional)
+CLAUDE_API_KEY=your-claude-api-key
+
+# Server port (default is 3000)
+PORT=3000
+```
+
+If no API key is provided, users will need to enter their own keys for on-demand quiz generation.
 
 Built with React, Tailwind, and Vite. No fancy backends or complicated setups.
 

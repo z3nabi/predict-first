@@ -24,22 +24,48 @@ const Quiz = () => {
       try {
         setIsLoading(true);
         
-        // Validate quiz ID exists in registry
-        const quizMeta = getQuizById(quizId);
-        if (!quizMeta) {
-          setError(`Quiz with ID '${quizId}' not found`);
-          setIsLoading(false);
-          return;
+        // Check if it's a generated paper quiz (starts with "paper-")
+        if (quizId.startsWith('paper-')) {
+          console.log(`Fetching generated paper quiz: ${quizId}`);
+          const response = await fetch(`/api/quizzes/${quizId}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch quiz: ${response.statusText}`);
+          }
+          
+          const generatedQuiz = await response.json();
+          console.log('Received generated quiz data:', generatedQuiz);
+          
+          setQuizInfo({
+            id: generatedQuiz.id,
+            title: generatedQuiz.title,
+            description: generatedQuiz.description,
+            author: generatedQuiz.author,
+            publishedDate: generatedQuiz.publishedDate
+          });
+          
+          setQuizData({
+            questions: generatedQuiz.questions,
+            methodologySummary: generatedQuiz.methodologySummary
+          });
+        } else {
+          // Validate quiz ID exists in registry
+          const quizMeta = getQuizById(quizId);
+          if (!quizMeta) {
+            setError(`Quiz with ID '${quizId}' not found`);
+            setIsLoading(false);
+            return;
+          }
+          
+          setQuizInfo(quizMeta);
+          
+          // Load quiz data
+          const data = await loadQuizData(quizId);
+          setQuizData({
+            questions: data.questions,
+            methodologySummary: data.methodologySummary
+          });
         }
-        
-        setQuizInfo(quizMeta);
-        
-        // Load quiz data
-        const data = await loadQuizData(quizId);
-        setQuizData({
-          questions: data.questions,
-          methodologySummary: data.methodologySummary
-        });
         
         setIsLoading(false);
       } catch (error) {
