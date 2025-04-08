@@ -6,7 +6,7 @@ import './App.css'
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 py-8">
+      <div className="min-h-screen py-8">
         <Routes>
           <Route path="/" element={<QuizSelector />} />
           <Route path="/quiz/:quizId" element={<Quiz />} />
