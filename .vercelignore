@@ -1,0 +1,3 @@
+# Ignore Rollup native modules
+node_modules/@rollup/rollup-*-gnu
+node_modules/@rollup/rollup-linux-* 

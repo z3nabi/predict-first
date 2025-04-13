@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'url'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,7 +15,18 @@ export default defineConfig({
           return;
         }
         warn(warning);
-      }
+      },
+      // Prevent loading of native modules
+      external: [
+        '@rollup/rollup-linux-x64-gnu',
+        '@rollup/rollup-linux-x64-musl',
+        '@rollup/rollup-darwin-x64',
+        '@rollup/rollup-darwin-arm64'
+      ]
     }
+  },
+  // Force disable native modules in the build
+  define: {
+    'process.env.ROLLUP_NATIVE_MODULES': JSON.stringify('no')
   }
 })

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "vite build",
+    "build": "ROLLUP_NATIVE_MODULES=no vite build",
+    "vercel-build": "node vercel-build.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "NODE_ENV=production node server.js"
