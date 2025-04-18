@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, AlertCircle, Loader } from 'lucide-react';
+import { Home, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 
 const PaperQuizGenerator = () => {
   const [paperUrl, setPaperUrl] = useState('');
@@ -8,8 +8,79 @@ const PaperQuizGenerator = () => {
   const [error, setError] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [jobId, setJobId] = useState(null);
+  const [jobStatus, setJobStatus] = useState(null);
+  const [progress, setProgress] = useState(0);
   
   const navigate = useNavigate();
+
+  // Poll for job status if we have a jobId
+  useEffect(() => {
+    let intervalId;
+    
+    if (jobId) {
+      // Start with a fast polling interval (2 seconds)
+      let pollingInterval = 2000;
+      let pollCount = 0;
+      
+      intervalId = setInterval(async () => {
+        try {
+          pollCount++;
+          
+          // After 5 polls, slow down to avoid hammering the server
+          if (pollCount === 5) {
+            clearInterval(intervalId);
+            pollingInterval = 5000; // Slow down to 5 seconds
+            intervalId = setInterval(checkJobStatus, pollingInterval);
+          }
+          
+          await checkJobStatus();
+        } catch (err) {
+          console.error('Error checking job status:', err);
+        }
+      }, pollingInterval);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [jobId]);
+  
+  const checkJobStatus = async () => {
+    try {
+      const response = await fetch(`/api/quiz-status?jobId=${jobId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to check job status');
+      }
+      
+      setJobStatus(data.status);
+      
+      // Update progress percentage for visual feedback
+      if (data.status === 'pending') {
+        // Increment progress slowly up to 90% while pending
+        setProgress(prev => Math.min(prev + 5, 90));
+      } else if (data.status === 'completed') {
+        setProgress(100);
+        // Wait a moment to show 100% completion before navigating
+        setTimeout(() => {
+          // The job is complete and we have a quiz - navigate to it
+          // Previous API returned quizId, now it's jobId that holds the quiz
+          navigate(`/quiz/${jobId}`);
+        }, 500);
+      } else if (data.status === 'failed') {
+        // Job failed - show error
+        setError(data.error || 'Failed to generate quiz');
+        setIsLoading(false);
+        setJobId(null);
+      }
+    } catch (err) {
+      console.error('Error polling job status:', err);
+      setError('Lost connection while checking job status');
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,10 +98,11 @@ const PaperQuizGenerator = () => {
     try {
       setIsLoading(true);
       setError(null);
+      setProgress(10); // Start progress at 10%
       
       console.log('Sending request to generate quiz for URL:', paperUrl);
       
-      // Make API call to backend to generate quiz
+      // Make API call to backend to create quiz generation job
       const response = await fetch('/api/generate-quiz', {
         method: 'POST',
         headers: {
@@ -38,7 +110,8 @@ const PaperQuizGenerator = () => {
         },
         body: JSON.stringify({
           paperUrl,
-          apiKey: showApiKeyInput ? apiKey : undefined
+          apiKey: showApiKeyInput ? apiKey : undefined,
+          debug: true // Add debug flag for local development testing
         }),
       });
       
@@ -48,14 +121,16 @@ const PaperQuizGenerator = () => {
         throw new Error(responseData.message || 'Failed to generate quiz');
       }
       
-      console.log('Quiz generated successfully:', responseData);
+      console.log('Quiz generation job created:', responseData);
       
-      // Redirect to the newly created quiz
-      navigate(`/quiz/${responseData.quizId}`);
+      // Store the jobId for polling
+      setJobId(responseData.jobId);
+      setProgress(20); // Bump progress after job creation
+      
+      // Note: we no longer navigate here, but wait for job completion
     } catch (err) {
       console.error('Error generating quiz:', err);
       setError(err.message || 'An error occurred while generating the quiz');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -78,6 +153,24 @@ const PaperQuizGenerator = () => {
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
           <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
           <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
+      {jobId && jobStatus === 'pending' && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Generating quiz...</span>
+            <span className="text-sm font-medium text-gray-700">{progress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <p className="mt-2 text-sm text-gray-600">
+            This typically takes 30-60 seconds. Claude is analyzing the paper and creating questions.
+          </p>
         </div>
       )}
 
@@ -137,24 +230,18 @@ const PaperQuizGenerator = () => {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || jobId}
           className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex justify-center items-center"
         >
           {isLoading ? (
             <>
               <Loader className="animate-spin h-5 w-5 mr-2" />
-              Generating Quiz... (This may take up to a minute)
+              Generating Quiz...
             </>
           ) : (
             'Generate Quiz'
           )}
         </button>
-        
-        {isLoading && (
-          <div className="text-center text-sm text-gray-600 mt-2">
-            <p>Claude is analyzing the paper and creating questions. This typically takes 30-60 seconds.</p>
-          </div>
-        )}
       </form>
     </div>
   );

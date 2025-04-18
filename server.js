@@ -4,7 +4,8 @@ import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import generateQuizHandler, { getGeneratedQuiz } from './api/generate-quiz.js';
+import generateQuizHandler from './api/generate-quiz.js';
+import quizStatusHandler from './api/quiz-status.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -23,24 +24,11 @@ async function createServer() {
   
   // API endpoints
   app.post('/api/generate-quiz', async (req, res) => {
-    // Mock the req/res objects to match the expected format in the handler
     await generateQuizHandler(req, res);
   });
   
-  // API endpoint to get a generated quiz by ID
-  app.get('/api/quizzes/:quizId', (req, res) => {
-    const { quizId } = req.params;
-    console.log(`Fetching quiz with ID: ${quizId}`);
-    
-    const quiz = getGeneratedQuiz(quizId);
-    
-    if (!quiz) {
-      console.log(`Quiz not found: ${quizId}`);
-      return res.status(404).json({ error: `Quiz with ID '${quizId}' not found` });
-    }
-    
-    console.log(`Found quiz: ${quiz.title}`);
-    return res.json(quiz);
+  app.get('/api/quiz-status', async (req, res) => {
+    await quizStatusHandler(req, res);
   });
 
   // In production, serve the built files

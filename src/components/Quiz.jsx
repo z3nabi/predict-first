@@ -24,7 +24,7 @@ const Quiz = () => {
       try {
         setIsLoading(true);
         
-        // Check if it's a generated paper quiz (starts with "paper-")
+        // Check if it's a generated paper quiz (starts with "paper-" or "job-")
         if (quizId.startsWith('paper-')) {
           console.log(`Fetching generated paper quiz: ${quizId}`);
           const response = await fetch(`/api/quizzes/${quizId}`);
@@ -38,6 +38,37 @@ const Quiz = () => {
           
           setQuizInfo({
             id: generatedQuiz.id,
+            title: generatedQuiz.title,
+            description: generatedQuiz.description,
+            author: generatedQuiz.author,
+            publishedDate: generatedQuiz.publishedDate
+          });
+          
+          setQuizData({
+            questions: generatedQuiz.questions,
+            methodologySummary: generatedQuiz.methodologySummary
+          });
+        } else if (quizId.startsWith('job-')) {
+          // New async job-based quiz
+          console.log(`Fetching quiz from job: ${quizId}`);
+          const response = await fetch(`/api/quiz-status?jobId=${quizId}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch quiz: ${response.statusText}`);
+          }
+          
+          const jobData = await response.json();
+          console.log('Received job data:', jobData);
+          
+          if (jobData.status !== 'completed') {
+            throw new Error(`Quiz generation not complete. Status: ${jobData.status}`);
+          }
+          
+          // Extract quiz data from the job
+          const generatedQuiz = jobData.quizData;
+          
+          setQuizInfo({
+            id: jobData.jobId,
             title: generatedQuiz.title,
             description: generatedQuiz.description,
             author: generatedQuiz.author,
