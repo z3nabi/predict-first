@@ -298,40 +298,44 @@ const Quiz = () => {
           </div>
           
           <div className="flex justify-between">
-            {currentQuestionIndex > 0 && (
-              <button
-                onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                className="px-4 py-2 rounded-md" 
-                style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
-              >
-                Previous
-              </button>
-            )}
+            <div>
+              {currentQuestionIndex > 0 && (
+                <button
+                  onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                  className="px-4 py-2 rounded-md" 
+                  style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
+                >
+                  Previous
+                </button>
+              )}
+            </div>
             
-            {!questionStatus[currentQuestionIndex] ? (
-              <button
-                onClick={handleSubmitAnswer}
-                disabled={!predictions[currentQuestionIndex]}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '0.375rem',
-                  backgroundColor: !predictions[currentQuestionIndex] ? '#e5e7eb' : '#2563eb',
-                  color: !predictions[currentQuestionIndex] ? '#9ca3af' : '#ffffff',
-                  cursor: !predictions[currentQuestionIndex] ? 'not-allowed' : 'pointer'
-                }}
-              >
-                Submit Answer
-              </button>
-            ) : (
-              <button
-                onClick={handleNext}
-                className="px-4 py-2 rounded-md flex items-center"
-                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-              >
-                {currentQuestionIndex < quizData.questions.length - 1 ? 'Next Question' : 'See Summary'} 
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </button>
-            )}
+            <div>
+              {!questionStatus[currentQuestionIndex] ? (
+                <button
+                  onClick={handleSubmitAnswer}
+                  disabled={!predictions[currentQuestionIndex]}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    backgroundColor: !predictions[currentQuestionIndex] ? '#e5e7eb' : '#2563eb',
+                    color: !predictions[currentQuestionIndex] ? '#9ca3af' : '#ffffff',
+                    cursor: !predictions[currentQuestionIndex] ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  Submit Answer
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 rounded-md flex items-center"
+                  style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                >
+                  {currentQuestionIndex < quizData.questions.length - 1 ? 'Next Question' : 'See Summary'} 
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ) : (
