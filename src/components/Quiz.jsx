@@ -202,29 +202,41 @@ const Quiz = () => {
             )}
             
             <div className="space-y-2">
-              {currentQuestion.options.map((option, index) => (
-                <div 
-                  key={index}
-                  onClick={() => handleOptionSelect(option)}
-                  className={`quiz-option ${
-                    predictions[currentQuestionIndex] === option 
-                      ? 'selected' 
-                      : 'default'
-                  } ${
-                    questionStatus[currentQuestionIndex] && option === currentQuestion.correctAnswer 
-                      ? 'correct' 
-                      : ''
-                  } ${
-                    questionStatus[currentQuestionIndex] && 
-                    predictions[currentQuestionIndex] === option && 
-                    option !== currentQuestion.correctAnswer 
-                      ? 'incorrect' 
-                      : ''
-                  }`}
-                >
-                  {option}
-                </div>
-              ))}
+              {currentQuestion.options.map((option, index) => {
+                const isSelected = predictions[currentQuestionIndex] === option;
+                const isQuestionAnswered = questionStatus[currentQuestionIndex];
+                const isCorrectAnswer = option === currentQuestion.correctAnswer;
+                const isIncorrectSelection = isSelected && !isCorrectAnswer && isQuestionAnswered;
+                
+                let className = "quiz-option ";
+                
+                if (isQuestionAnswered) {
+                  // Question has been answered
+                  if (isCorrectAnswer) {
+                    // This is the correct answer - always highlight it
+                    className += "correct ";
+                  } else if (isSelected) {
+                    // This is an incorrect answer that was selected
+                    className += "incorrect ";
+                  } else {
+                    // This is just a regular unselected option
+                    className += "default ";
+                  }
+                } else {
+                  // Question hasn't been answered yet
+                  className += isSelected ? "selected " : "default ";
+                }
+                
+                return (
+                  <div 
+                    key={index}
+                    onClick={() => handleOptionSelect(option)}
+                    className={className.trim()}
+                  >
+                    {option}
+                  </div>
+                );
+              })}
             </div>
             
             {questionStatus[currentQuestionIndex] && (
