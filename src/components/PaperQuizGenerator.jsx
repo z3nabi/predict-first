@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { Home, AlertCircle, Loader } from 'lucide-react';
 
 const PaperQuizGenerator = () => {
   const [paperUrl, setPaperUrl] = useState('');
@@ -8,79 +8,9 @@ const PaperQuizGenerator = () => {
   const [error, setError] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [jobId, setJobId] = useState(null);
-  const [jobStatus, setJobStatus] = useState(null);
-  const [progress, setProgress] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState('Generating Quiz...');
   
   const navigate = useNavigate();
-
-  // Poll for job status if we have a jobId
-  useEffect(() => {
-    let intervalId;
-    
-    if (jobId) {
-      // Start with a fast polling interval (2 seconds)
-      let pollingInterval = 2000;
-      let pollCount = 0;
-      
-      intervalId = setInterval(async () => {
-        try {
-          pollCount++;
-          
-          // After 5 polls, slow down to avoid hammering the server
-          if (pollCount === 5) {
-            clearInterval(intervalId);
-            pollingInterval = 5000; // Slow down to 5 seconds
-            intervalId = setInterval(checkJobStatus, pollingInterval);
-          }
-          
-          await checkJobStatus();
-        } catch (err) {
-          console.error('Error checking job status:', err);
-        }
-      }, pollingInterval);
-    }
-    
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [jobId]);
-  
-  const checkJobStatus = async () => {
-    try {
-      const response = await fetch(`/api/quiz-status?jobId=${jobId}`);
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to check job status');
-      }
-      
-      setJobStatus(data.status);
-      
-      // Update progress percentage for visual feedback
-      if (data.status === 'pending') {
-        // Increment progress slowly up to 90% while pending
-        setProgress(prev => Math.min(prev + 5, 90));
-      } else if (data.status === 'completed') {
-        setProgress(100);
-        // Wait a moment to show 100% completion before navigating
-        setTimeout(() => {
-          // The job is complete and we have a quiz - navigate to it
-          // Previous API returned quizId, now it's jobId that holds the quiz
-          navigate(`/quiz/${jobId}`);
-        }, 500);
-      } else if (data.status === 'failed') {
-        // Job failed - show error
-        setError(data.error || 'Failed to generate quiz');
-        setIsLoading(false);
-        setJobId(null);
-      }
-    } catch (err) {
-      console.error('Error polling job status:', err);
-      setError('Lost connection while checking job status');
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,14 +25,14 @@ const PaperQuizGenerator = () => {
       return;
     }
     
+    setIsLoading(true);
+    setError(null);
+    setLoadingMessage('Requesting quiz generation...');
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      setProgress(10); // Start progress at 10%
+      console.log('Sending request to generate quiz stream for URL:', paperUrl);
       
-      console.log('Sending request to generate quiz for URL:', paperUrl);
-      
-      // Make API call to backend to create quiz generation job
+      // Make API call to backend to start streaming
       const response = await fetch('/api/generate-quiz', {
         method: 'POST',
         headers: {
@@ -110,28 +40,69 @@ const PaperQuizGenerator = () => {
         },
         body: JSON.stringify({
           paperUrl,
-          apiKey: showApiKeyInput ? apiKey : undefined,
-          debug: true // Add debug flag for local development testing
+          apiKey: showApiKeyInput ? apiKey : undefined
         }),
       });
       
-      const responseData = await response.json();
-      
       if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to generate quiz');
+         // Attempt to read error message from non-streaming response
+         const errorData = await response.json().catch(() => ({ message: 'Failed to start generation stream.' }));
+         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response body exists and is readable
+      if (!response.body) {
+        throw new Error('Response body is missing or not readable.');
+      }
+
+      setLoadingMessage('Receiving quiz data from Claude...');
+      
+      // Process the stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedJson = '';
+      
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        accumulatedJson += decoder.decode(value, { stream: true });
+        // Optional: Update loading message based on progress if needed
+        // setLoadingMessage(`Receiving quiz data... (${accumulatedJson.length} bytes)`);
       }
       
-      console.log('Quiz generation job created:', responseData);
+      // Ensure final chunk is decoded
+      accumulatedJson += decoder.decode(); 
       
-      // Store the jobId for polling
-      setJobId(responseData.jobId);
-      setProgress(20); // Bump progress after job creation
+      console.log('Stream finished. Received JSON string length:', accumulatedJson.length);
       
-      // Note: we no longer navigate here, but wait for job completion
+      // Parse the accumulated JSON
+      let quizData;
+      try {
+        quizData = JSON.parse(accumulatedJson);
+        console.log('Successfully parsed quiz JSON');
+      } catch (parseError) {
+        console.error('Failed to parse JSON from stream:', parseError);
+        console.error('Received text:', accumulatedJson); // Log the problematic text
+        throw new Error('Received invalid data from the generation service.');
+      }
+      
+      if (!quizData || !quizData.questions || !quizData.title) {
+        console.error('Parsed JSON is missing expected fields:', quizData);
+        throw new Error('Generated quiz data is incomplete.');
+      }
+
+      // Generate a temporary ID for the quiz route
+      const tempQuizId = `paper-${Date.now().toString(36)}`;
+      
+      // Navigate to the Quiz component, passing the data via state
+      navigate(`/quiz/${tempQuizId}`, { state: { quizData } });
+      
     } catch (err) {
-      console.error('Error generating quiz:', err);
-      setError(err.message || 'An error occurred while generating the quiz');
+      console.error('Error during quiz generation stream:', err);
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
       setIsLoading(false);
+      setLoadingMessage('Generating Quiz...'); // Reset loading message
     }
   };
 
@@ -153,24 +124,6 @@ const PaperQuizGenerator = () => {
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
           <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
           <p className="text-red-700">{error}</p>
-        </div>
-      )}
-
-      {jobId && jobStatus === 'pending' && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Generating quiz...</span>
-            <span className="text-sm font-medium text-gray-700">{progress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className="mt-2 text-sm text-gray-600">
-            This typically takes 30-60 seconds. Claude is analyzing the paper and creating questions.
-          </p>
         </div>
       )}
 
@@ -227,21 +180,27 @@ const PaperQuizGenerator = () => {
             </p>
           </div>
         )}
-
+        
         <button
           type="submit"
-          disabled={isLoading || jobId}
-          className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex justify-center items-center"
+          disabled={isLoading}
+          className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
               <Loader className="animate-spin h-5 w-5 mr-2" />
-              Generating Quiz...
+              {loadingMessage}
             </>
           ) : (
             'Generate Quiz'
           )}
         </button>
+
+        {isLoading && (
+          <div className="text-center text-sm text-gray-600 mt-2">
+            <p>Please wait, this can take a minute or more depending on the paper size and Claude's response time...</p>
+          </div>
+        )}
       </form>
     </div>
   );

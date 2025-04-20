@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, ArrowRight, RotateCcw, ChevronDown, ChevronUp, Info, Home } from 'lucide-react';
 import { loadQuizData, getQuizById } from '../data/quizRegistry';
 
 const Quiz = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Get location object
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [predictions, setPredictions] = useState({});
@@ -14,7 +15,7 @@ const Quiz = () => {
   const [showMethodology, setShowMethodology] = useState(false);
   const [expandedContexts, setExpandedContexts] = useState({});
   const [questionStatus, setQuestionStatus] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Start loading initially
   const [quizData, setQuizData] = useState({ questions: [], methodologySummary: '' });
   const [quizInfo, setQuizInfo] = useState(null);
   const [error, setError] = useState(null);
@@ -22,85 +23,58 @@ const Quiz = () => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
+        setError(null);
         setIsLoading(true);
-        
-        // Check if it's a generated paper quiz (starts with "paper-" or "job-")
-        if (quizId.startsWith('paper-')) {
-          console.log(`Fetching generated paper quiz: ${quizId}`);
-          const response = await fetch(`/api/quizzes/${quizId}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch quiz: ${response.statusText}`);
-          }
-          
-          const generatedQuiz = await response.json();
-          console.log('Received generated quiz data:', generatedQuiz);
-          
+
+        // 1. Check if quiz data was passed via navigation state (for streamed quizzes)
+        if (location.state?.quizData) {
+          console.log('Received quiz data via navigation state:', location.state.quizData);
+          const generatedQuiz = location.state.quizData;
           setQuizInfo({
-            id: generatedQuiz.id,
+            id: quizId, // Use the ID from the URL param (e.g., paper-xyz)
             title: generatedQuiz.title,
             description: generatedQuiz.description,
             author: generatedQuiz.author,
             publishedDate: generatedQuiz.publishedDate
           });
-          
           setQuizData({
             questions: generatedQuiz.questions,
             methodologySummary: generatedQuiz.methodologySummary
           });
-        } else if (quizId.startsWith('job-')) {
-          // New async job-based quiz
-          console.log(`Fetching quiz from job: ${quizId}`);
-          const response = await fetch(`/api/quiz-status?jobId=${quizId}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch quiz: ${response.statusText}`);
-          }
-          
-          const jobData = await response.json();
-          console.log('Received job data:', jobData);
-          
-          if (jobData.status !== 'completed') {
-            throw new Error(`Quiz generation not complete. Status: ${jobData.status}`);
-          }
-          
-          // Extract quiz data from the job
-          const generatedQuiz = jobData.quizData;
-          
-          setQuizInfo({
-            id: jobData.jobId,
-            title: generatedQuiz.title,
-            description: generatedQuiz.description,
-            author: generatedQuiz.author,
-            publishedDate: generatedQuiz.publishedDate
-          });
-          
-          setQuizData({
-            questions: generatedQuiz.questions,
-            methodologySummary: generatedQuiz.methodologySummary
-          });
-        } else {
-          // Validate quiz ID exists in registry
-          const quizMeta = getQuizById(quizId);
-          if (!quizMeta) {
-            setError(`Quiz with ID '${quizId}' not found`);
-            setIsLoading(false);
-            return;
-          }
-          
-          setQuizInfo(quizMeta);
-          
-          // Load quiz data
-          const data = await loadQuizData(quizId);
-          setQuizData({
-            questions: data.questions,
-            methodologySummary: data.methodologySummary
-          });
+          setIsLoading(false);
+          return; // Data loaded from state, no need to fetch
         }
+
+        // 2. If no state data, check if it's an old generated quiz ID (paper-)
+        //    or a job ID (job-) - These are now deprecated/won't be fetched
+        if (quizId.startsWith('paper-') || quizId.startsWith('job-')) {
+           console.warn(`Attempted to load quiz ${quizId} by ID - generated quizzes should now be passed via state.`);
+           setError(`Generated quiz data not found. Please generate the quiz again.`);
+           setIsLoading(false);
+           return;
+        }
+        
+        // 3. If not generated/streamed, assume it's a predefined quiz from registry
+        const quizMeta = getQuizById(quizId);
+        if (!quizMeta) {
+          setError(`Quiz with ID '${quizId}' not found in registry.`);
+          setIsLoading(false);
+          return;
+        }
+        
+        setQuizInfo(quizMeta);
+        
+        // Load predefined quiz data
+        console.log(`Loading predefined quiz: ${quizId}`);
+        const data = await loadQuizData(quizId);
+        setQuizData({
+          questions: data.questions,
+          methodologySummary: data.methodologySummary
+        });
         
         setIsLoading(false);
       } catch (error) {
-        console.error("Error loading quiz data:", error);
+        console.error("Error processing quiz data:", error);
         setError(`Failed to load quiz: ${error.message}`);
         setIsLoading(false);
       }
@@ -116,7 +90,7 @@ const Quiz = () => {
     setError(null);
     
     fetchQuizData();
-  }, [quizId]);
+  }, [quizId, location.state]); // Add location.state as dependency
   
   const handleOptionSelect = (option) => {
     if (questionStatus[currentQuestionIndex]) return; // Prevent changing answer after submission

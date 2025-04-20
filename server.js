@@ -5,7 +5,6 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import generateQuizHandler from './api/generate-quiz.js';
-import quizStatusHandler from './api/quiz-status.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -27,10 +26,6 @@ async function createServer() {
     await generateQuizHandler(req, res);
   });
   
-  app.get('/api/quiz-status', async (req, res) => {
-    await quizStatusHandler(req, res);
-  });
-
   // In production, serve the built files
   if (isProduction) {
     app.use(express.static(path.resolve(__dirname, 'dist')));
