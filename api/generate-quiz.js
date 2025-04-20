@@ -48,8 +48,6 @@ Return your response in this JSON format only:
 {
   "title": "Title of the Quiz Based on Paper",
   "description": "Brief description of what the quiz covers (1-2 sentences)",
-  "author": "Authors of the paper",
-  "publishedDate": "Year of publication",
   "methodologySummary": "Overview of the methodology used in the paper",
   "questions": [
     {

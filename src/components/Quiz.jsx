@@ -34,8 +34,6 @@ const Quiz = () => {
             id: quizId, // Use the ID from the URL param (e.g., paper-xyz)
             title: generatedQuiz.title,
             description: generatedQuiz.description,
-            author: generatedQuiz.author,
-            publishedDate: generatedQuiz.publishedDate
           });
           setQuizData({
             questions: generatedQuiz.questions,
