@@ -9,11 +9,5 @@
       "src": "/(.*)",
       "dest": "dist/$1"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/process-quiz-jobs",
-      "schedule": "* * * * *"
-    }
   ]
 }
