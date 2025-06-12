@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, AlertCircle, Loader } from 'lucide-react';
 
+// Shared button component for consistency
+const PrimaryButton = ({ type, disabled, onClick, children, className = '', isLoading = false }) => {
+  const baseClasses = "inline-block px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 font-medium transition-colors duration-200 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed";
+  
+  return (
+    <button 
+      type={type}
+      disabled={disabled || isLoading}
+      onClick={onClick}
+      className={`${baseClasses} ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
 const PaperQuizGenerator = () => {
   const [paperUrl, setPaperUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -66,8 +82,6 @@ const PaperQuizGenerator = () => {
         const { value, done } = await reader.read();
         if (done) break;
         accumulatedJson += decoder.decode(value, { stream: true });
-        // Optional: Update loading message based on progress if needed
-        // setLoadingMessage(`Receiving quiz data... (${accumulatedJson.length} bytes)`);
       }
       
       // Ensure final chunk is decoded
@@ -107,29 +121,29 @@ const PaperQuizGenerator = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md transition-colors">
       <div className="flex justify-between items-center mb-6">
-        <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center">
+        <Link to="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
           <Home className="h-4 w-4 mr-1" /> Back to Quizzes
         </Link>
-        <h1 className="text-2xl font-bold text-center text-gray-800">Generate Paper Quiz</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100">Generate Paper Quiz</h1>
         <div className="w-6"></div> {/* Empty div for flex layout balance */}
       </div>
       
-      <p className="text-center text-gray-600 mb-6">
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
         Enter the URL to a research paper PDF and we'll generate a quiz to test your understanding of the paper.
       </p>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-          <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-          <p className="text-red-700">{error}</p>
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg flex items-start">
+          <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2 flex-shrink-0 mt-0.5" />
+          <p className="text-red-700 dark:text-red-300">{error}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="paperUrl" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="paperUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Paper URL (PDF)
           </label>
           <input
@@ -138,11 +152,11 @@ const PaperQuizGenerator = () => {
             value={paperUrl}
             onChange={(e) => setPaperUrl(e.target.value)}
             placeholder="https://example.com/paper.pdf"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             disabled={isLoading}
             required
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Tip: Use direct links to PDFs from sources like arXiv (e.g., https://arxiv.org/pdf/1234.56789.pdf)
           </p>
         </div>
@@ -153,17 +167,17 @@ const PaperQuizGenerator = () => {
             id="useOwnApiKey"
             checked={showApiKeyInput}
             onChange={() => setShowApiKeyInput(!showApiKeyInput)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+            className="h-4 w-4 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 rounded bg-white dark:bg-gray-700"
             disabled={isLoading}
           />
-          <label htmlFor="useOwnApiKey" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor="useOwnApiKey" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
             Use my own Claude API key
           </label>
         </div>
 
         {showApiKeyInput && (
           <div>
-            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Claude API Key
             </label>
             <input
@@ -172,19 +186,20 @@ const PaperQuizGenerator = () => {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="Enter your Claude API key"
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               disabled={isLoading}
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Your API key is only used for this request and is not stored.
             </p>
           </div>
         )}
         
-        <button
+        <PrimaryButton
           type="submit"
           disabled={isLoading}
-          className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full p-3 flex justify-center items-center"
+          isLoading={isLoading}
         >
           {isLoading ? (
             <>
@@ -194,10 +209,10 @@ const PaperQuizGenerator = () => {
           ) : (
             'Generate Quiz'
           )}
-        </button>
+        </PrimaryButton>
 
         {isLoading && (
-          <div className="text-center text-sm text-gray-600 mt-2">
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
             <p>Please wait, this can take a minute or more depending on the paper size and Claude's response time...</p>
           </div>
         )}

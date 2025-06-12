@@ -6,39 +6,40 @@
 @layer components {
   .quiz-option {
     @apply p-3 rounded-md cursor-pointer transition-colors;
-    color: #213547; /* Hard-coded text color */
+    @apply text-gray-800 dark:text-gray-200;
   }
   
   .quiz-option.selected {
     @apply border;
-    background-color: #dbeafe; /* Hard-coded bg color */
-    border-color: #60a5fa; /* Hard-coded border color */
-    color: #213547; /* Hard-coded text color */
+    @apply bg-blue-100 dark:bg-blue-900;
+    @apply border-blue-400 dark:border-blue-600;
+    @apply text-gray-800 dark:text-gray-200;
   }
   
   .quiz-option.correct {
     @apply border;
-    background-color: #dcfce7; /* Hard-coded bg color */
-    border-color: #22c55e; /* Hard-coded border color */
-    color: #213547; /* Hard-coded text color */
+    @apply bg-green-100 dark:bg-green-900;
+    @apply border-green-500 dark:border-green-700;
+    @apply text-gray-800 dark:text-gray-200;
   }
   
   .quiz-option.incorrect {
     @apply border;
-    background-color: #fee2e2; /* Hard-coded bg color */
-    border-color: #ef4444; /* Hard-coded border color */
-    color: #213547; /* Hard-coded text color */
+    @apply bg-red-100 dark:bg-red-900;
+    @apply border-red-500 dark:border-red-700;
+    @apply text-gray-800 dark:text-gray-200;
   }
   
   .quiz-option.default {
     @apply border;
-    background-color: #f3f4f6; /* Hard-coded bg color */
-    border-color: #e5e7eb; /* Hard-coded border color */
-    color: #213547; /* Hard-coded text color */
+    @apply bg-gray-100 dark:bg-gray-800;
+    @apply border-gray-300 dark:border-gray-700;
+    @apply text-gray-800 dark:text-gray-200;
   }
   
   .quiz-option.default:hover {
-    background-color: #e5e7eb; /* Hard-coded hover bg color */
+    @apply bg-gray-200 dark:bg-gray-600;
+    @apply border-gray-400 dark:border-gray-500;
   }
 }
 
@@ -47,10 +48,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* We're removing the dynamic color-scheme and setting fixed colors */
-  /* color-scheme: light dark; */
-  color: #213547;
-  background-color: #ffffff;
+  color-scheme: light dark;
+  @apply text-gray-800 dark:text-gray-200;
+  @apply bg-white dark:bg-gray-900;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -60,11 +60,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  @apply text-blue-600 dark:text-blue-400;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  @apply text-blue-800 dark:text-blue-300;
 }
 
 body {
@@ -73,14 +73,14 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #ffffff;
-  color: #213547;
+  @apply bg-white dark:bg-gray-900;
+  @apply text-gray-800 dark:text-gray-200;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  color: #213547;
+  @apply text-gray-800 dark:text-gray-200;
 }
 
 button {
@@ -90,13 +90,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #f9f9f9;
-  color: #213547;
+  @apply bg-gray-100 dark:bg-gray-800;
+  @apply text-gray-800 dark:text-gray-200;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  @apply border-blue-500;
 }
 button:focus,
 button:focus-visible {
