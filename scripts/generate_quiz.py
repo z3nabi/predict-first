@@ -117,7 +117,7 @@ Important:
         
         # Create the message with the PDF URL
         response = client.messages.create(
-            model="claude-3-7-sonnet-20250219",
+            model="claude-opus-4-20250514",
             max_tokens=4000,
             temperature=0.2,
             system="You are an expert at creating educational quizzes based on research papers.",

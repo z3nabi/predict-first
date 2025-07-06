@@ -195,15 +195,15 @@ const Quiz = () => {
 
   return (
     <div className="flex flex-col space-y-6 max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-      <div className="flex justify-between items-center">
+      {/* Header: Back button on its own line (left-aligned) and title centered below */}
+      <div className="mb-2">
         <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center">
           <Home className="h-4 w-4 mr-1" /> Back to Quizzes
         </Link>
-        <h1 className="text-2xl font-bold text-center text-gray-800">{quizInfo?.title}</h1>
-        <div className="w-6"></div> {/* Empty div for flex layout balance */}
       </div>
+      <h1 className="text-2xl font-bold text-center text-gray-800">{quizInfo?.title}</h1>
       
-      <p className="text-center text-gray-600">{quizInfo?.description}</p>
+      <p className="text-center text-gray-600 mt-1">{quizInfo?.description}</p>
       
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <div 

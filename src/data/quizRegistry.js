@@ -3,11 +3,13 @@
 // Import quiz metadata from each quiz file
 import { quizMetadata as cotFaithfulnessMetadata } from './quizzes/cot-faithfulness';
 import { quizMetadata as emergentMisalignment } from './quizzes/emergent-misalignment';
+import { quizMetadata as evalaware } from './quizzes/eval-aware';
 
 // Registry of all available quizzes
 export const quizRegistry = [
   cotFaithfulnessMetadata,
   emergentMisalignment,
+  evalaware,
 ];
 
 // Utility function to get quiz by ID
@@ -24,7 +26,9 @@ export const loadQuizData = async (quizId) => {
         return import('./quizzes/cot-faithfulness');
       case 'emergent-misalignment':
         return import('./quizzes/emergent-misalignment');
-      default:
+            case 'eval-aware':
+        return import('./quizzes/eval-aware');
+default:
         throw new Error(`Quiz with ID '${quizId}' not found`);
     }
   } catch (error) {
