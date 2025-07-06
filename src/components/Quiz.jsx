@@ -15,7 +15,7 @@ const Quiz = () => {
   const [expandedContexts, setExpandedContexts] = useState({});
   const [questionStatus, setQuestionStatus] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [quizData, setQuizData] = useState({ questions: [], methodologySummary: '' });
+  const [quizData, setQuizData] = useState({ questions: [], methodologySummary: '', figures: [] });
   const [quizInfo, setQuizInfo] = useState(null);
   const [error, setError] = useState(null);
 
@@ -38,7 +38,8 @@ const Quiz = () => {
         const data = await loadQuizData(quizId);
         setQuizData({
           questions: data.questions,
-          methodologySummary: data.methodologySummary
+          methodologySummary: data.methodologySummary,
+          figures: data.figures || []
         });
         
         setIsLoading(false);
@@ -193,6 +194,24 @@ const Quiz = () => {
   // If data is loaded
   const currentQuestion = quizData.questions[currentQuestionIndex];
 
+  // Helper to fetch a figure object by ID
+  const getFigure = (id) => {
+    if (!id || !quizData.figures) return null;
+    return quizData.figures.find((f) => f.id === id) || null;
+  };
+
+  const questionFigure = getFigure(
+    currentQuestion.questionFigureId || currentQuestion.figureIdQuestion
+  );
+
+  const contextFigure = getFigure(
+    currentQuestion.contextFigureId || currentQuestion.figureIdContext
+  );
+
+  const answerFigure = getFigure(
+    currentQuestion.answerFigureId || currentQuestion.figureIdAnswer || currentQuestion.figureId
+  );
+
   return (
     <div className="flex flex-col space-y-6 max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
       {/* Header: Back button on its own line (left-aligned) and title centered below */}
@@ -240,6 +259,16 @@ const Quiz = () => {
               <span className="text-sm font-medium" style={{ color: '#2563eb' }}>{Object.keys(questionStatus).length} answered</span>
             </div>
             
+            {questionFigure && (
+              <figure className="my-4">
+                <img
+                  src={questionFigure.src}
+                  alt={questionFigure.id}
+                  className="mx-auto max-h-96 object-contain"
+                />
+              </figure>
+            )}
+            
             <h2 className="text-lg font-medium mb-2" style={{ color: '#213547' }}>{currentQuestion.question}</h2>
             
             {currentQuestion.context && (
@@ -260,6 +289,15 @@ const Quiz = () => {
                 {expandedContexts[currentQuestionIndex] && (
                   <div className="mt-2 p-3 rounded-md text-sm" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb', color: '#374151', border: '1px solid #e5e7eb' }}>
                     {currentQuestion.context}
+                    {contextFigure && (
+                      <figure className="my-4">
+                        <img
+                          src={contextFigure.src}
+                          alt={contextFigure.id}
+                          className="mx-auto max-h-96 object-contain"
+                        />
+                      </figure>
+                    )}
                   </div>
                 )}
               </div>
@@ -326,6 +364,15 @@ const Quiz = () => {
                         : `Incorrect. The correct answer is: ${currentQuestion.correctAnswer}`}
                     </p>
                     <p className="text-sm" style={{ color: '#213547' }}>{currentQuestion.explanation}</p>
+                    {answerFigure && (
+                      <figure className="my-4">
+                        <img
+                          src={answerFigure.src}
+                          alt={answerFigure.id}
+                          className="mx-auto max-h-96 object-contain"
+                        />
+                      </figure>
+                    )}
                   </div>
                 </div>
               </div>
@@ -397,6 +444,21 @@ const Quiz = () => {
                         Correct answer: <span className="font-medium" style={{ color: '#16a34a' }}>{q.correctAnswer}</span>
                       </p>
                       <p className="text-sm mt-2" style={{ color: '#374151' }}>{q.explanation}</p>
+                      {(() => {
+                        const figId = q.answerFigureId || q.figureIdAnswer || q.figureId;
+                        if (!quizData.figures || !figId) return null;
+                        const fig = quizData.figures.find(f => f.id === figId);
+                        if (!fig) return null;
+                        return (
+                          <figure className="my-4">
+                            <img
+                              src={fig.src}
+                              alt={fig.id}
+                              className="mx-auto max-h-96 object-contain"
+                            />
+                          </figure>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

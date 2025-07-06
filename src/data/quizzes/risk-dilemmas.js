@@ -1,10 +1,13 @@
 // risk-dilemmas.js - Quiz data for Will AI Tell Lies to Save Sick Children?
 
+import riskDilemmasQ1Img from '../../assets/figures/risk-dilemmas_q1.png';
+import riskDilemmasQ4Img from '../../assets/figures/risk-dilemmas_q4.png';
+
 export const quizMetadata = {
   id: "risk-dilemmas",
   title: "Will AI Tell Lies to Save Sick Children?",
   description: "Test your intuitions about AI value prioritization and risky behaviors",
-  paperLink: "https://arxiv.org/pdf/2505.14633",
+  paperLink: "https://arxiv.org/abs/2505.14633",
 };
 
 export const methodologySummary = `
@@ -19,6 +22,7 @@ export const questions = [
   {
     id: 1,
     question: "When faced with dilemmas, do flagship AI models (GPT-4, Claude, etc.) generally prioritize Privacy similarly or differently?",
+    contextFigureId: "riskDilemmasQ1",
     options: ["They all rank Privacy very low (bottom 3)", "They show significant disagreement", "They all rank Privacy very high (top 2)", "They prioritize it moderately (middle rankings)"],
     correctAnswer: "They all rank Privacy very high (top 2)",
     explanation: "All flagship models prioritize Privacy as their #1 or #2 value, showing remarkable convergence on data protection and personal boundaries.",
@@ -45,6 +49,7 @@ export const questions = [
     question: "When AI models face choices affecting humans vs. other AIs, which value do they prioritize MORE for human targets?",
     options: ["Communication", "Creativity", "Privacy", "Truthfulness", "Adaptability", "Learning"],
     correctAnswer: "Privacy",
+    answerFigureId: "riskDilemmasQ4",
     explanation: "Models place greater emphasis on Privacy (5.9 ranks higher) when humans are affected, while prioritizing Communication more when other AIs are affected.",
     context: "The study analyzed whether AI models show different value priorities depending on whether their actions affect humans or other AI systems."
   },
@@ -96,4 +101,15 @@ export const questions = [
     explanation: "Both Claude 3.7 Sonnet and GPT-4o show higher consistency in revealed preferences than stated preferences, and the two types of preferences show negative correlation.",
     context: "The study compared what models say they value in surveys versus what their actual choices reveal about their values."
   }
+];
+
+export const figures = [
+  {
+    id: "riskDilemmasQ1",
+    src: riskDilemmasQ1Img,
+  },
+  {
+    id: "riskDilemmasQ4",
+    src: riskDilemmasQ4Img,
+  },
 ];

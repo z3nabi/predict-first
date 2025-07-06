@@ -53,3 +53,53 @@ npm run dev
 Built with React, Tailwind, and Vite. No fancy backends or complicated setups.
 
 Happy predicting! 🚀
+
+## Adding Figures to Quizzes 🎨
+
+Quizzes can now include illustrative images, for example a key chart from the paper.  A quiz file supports **three** optional placements:
+
+| Placement | Field on question object | Where it appears |
+|-----------|-------------------------|------------------|
+| With the question | `questionFigureId` | Shown immediately **above** the question text, before the user answers. |
+| Inside context | `contextFigureId` | Shown inside the expandable "Show context" panel. |
+| With the answer | `answerFigureId` (alias: legacy `figureId`) | Shown next to the explanation after the user submits their answer, and again in the summary view. |
+
+### 1. Save your image
+
+Put your PNG/JPG/SVG in `src/assets/figures/`.  Vite will hash the file at build time, so you **must import** the image in the quiz file instead of writing a string path.
+
+```js
+// example-quiz.js
+import coolChart from '../../assets/figures/cool-chart.png';
+```
+
+### 2. Register the image in `figures`
+
+Each quiz file exports a `figures` array parallel to `questions`:
+
+```js
+export const figures = [
+  { id: 'coolChart', src: coolChart },
+  // more figures ...
+];
+```
+
+Only `id` and `src` are required; captions are intentionally omitted to keep the UI clean.
+
+### 3. Reference the figure from a question
+
+```js
+export const questions = [
+  {
+    id: 4,
+    question: 'Which model performed best?',
+    questionFigureId: 'coolChart',       // appears before question text
+    // or contextFigureId / answerFigureId depending on placement
+    options: ['A', 'B', 'C'],
+    correctAnswer: 'C',
+    explanation: 'Model C had the highest accuracy…',
+  },
+];
+```
+
+That's it—refresh the dev server and the image will render in the designated spot.  Quizzes that omit these fields continue to work unchanged.
