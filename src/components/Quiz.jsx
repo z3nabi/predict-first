@@ -113,6 +113,59 @@ const Quiz = () => {
     });
   };
 
+  // Helper to render the plain-text methodology summary with proper bullet lists
+  const renderMethodologySummary = (summary) => {
+    if (!summary) return null;
+
+    const lines = summary.trim().split('\n');
+    const elements = [];
+    let listItems = [];
+
+    const flushList = (keyPrefix) => {
+      if (listItems.length) {
+        elements.push(
+          <ul
+            key={`list-${keyPrefix}`}
+            className="list-disc pl-6 space-y-1 text-left"
+          >
+            {listItems.map((item, idx) => (
+              <li key={`${keyPrefix}-${idx}`}>{item}</li>
+            ))}
+          </ul>
+        );
+        listItems = [];
+      }
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith('- ')) {
+        // Accumulate list items
+        listItems.push(trimmed.slice(2).trim());
+      } else {
+        // Before handling a normal line, flush any pending list items
+        flushList(idx);
+
+        if (trimmed.length === 0) {
+          // Preserve paragraph breaks
+          elements.push(<div key={`br-${idx}`} className="h-2" />);
+        } else {
+          elements.push(
+            <p key={`p-${idx}`} className="text-left mb-2">
+              {trimmed}
+            </p>
+          );
+        }
+      }
+    });
+
+    // Flush any remaining list items
+    flushList('last');
+
+    return elements;
+  };
+
   // Show error state
   if (error) {
     return (
@@ -162,8 +215,8 @@ const Quiz = () => {
         </div>
         
         {showMethodology && (
-          <div className="mt-3 text-blue-800 whitespace-pre-line">
-            {quizData.methodologySummary}
+          <div className="mt-3 text-blue-800 space-y-2">
+            {renderMethodologySummary(quizData.methodologySummary)}
           </div>
         )}
       </div>
