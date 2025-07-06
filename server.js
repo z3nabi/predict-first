@@ -14,7 +14,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || 3000;
 
-async function createServer() {
+// ---------------------------------------------
+// 1. Build an Express app that works for both:
+//    • Vercel Serverless Functions (exported handler)
+//    • Local development (`npm run dev` / `npm start`)
+// ---------------------------------------------
+
+async function initServer() {
   const app = express();
   
   // Middleware
@@ -26,31 +32,52 @@ async function createServer() {
     await generateQuizHandler(req, res);
   });
   
-  // In production, serve the built files
   if (isProduction) {
-    app.use(express.static(path.resolve(__dirname, 'dist')));
+    // Serve the compiled frontend
+    const staticDir = path.resolve(__dirname, 'dist');
+    app.use(express.static(staticDir));
     
-    // Handle client-side routing
+    // SPA fallback – always return index.html
     app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+      res.sendFile(path.join(staticDir, 'index.html'));
     });
   } else {
-    // In development, create a Vite server
+    // Development: use Vite dev server in middleware mode
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
-    
-    // Use Vite's connect instance as middleware
     app.use(vite.middlewares);
   }
   
-  // Start the server
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-createServer().catch((err) => {
-  console.error('Error starting server:', err);
-}); 
+// ---------------------------------------------
+// 2. Vercel Serverless Function export
+// ---------------------------------------------
+
+let vercelApp; // cached between invocations
+
+export default async function handler(req, res) {
+  if (!vercelApp) {
+    vercelApp = await initServer();
+  }
+  return vercelApp(req, res);
+}
+
+// ---------------------------------------------
+// 3. Local development / traditional server
+// ---------------------------------------------
+
+if (!process.env.VERCEL) {
+  initServer()
+    .then((app) => {
+      app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Error starting server:', err);
+    });
+} 
