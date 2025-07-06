@@ -32,10 +32,6 @@ const QuizSelector = () => {
           >
             <h2 className="text-xl font-bold mb-2 text-blue-700">{quiz.title}</h2>
             <p className="text-gray-600 mb-4">{quiz.description}</p>
-            <div className="flex justify-between items-center text-sm text-gray-500">
-              <span>By {quiz.author || 'Unknown'}</span>
-              <span>{quiz.publishedDate || ''}</span>
-            </div>
             <div className="mt-4 flex flex-col sm:flex-row gap-2">
               <Link 
                 to={`/quiz/${quiz.id}`}

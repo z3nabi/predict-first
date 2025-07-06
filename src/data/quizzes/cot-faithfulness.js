@@ -4,8 +4,6 @@ export const quizMetadata = {
   id: "cot-faithfulness",
   title: "Chain-of-Thought Faithfulness Quiz",
   description: "Test your intuitions about AI safety and chain-of-thought reasoning based on the \"Reasoning Models Don't Always Say What They Think\" paper.",
-  author: "Anthropic",
-  publishedDate: "2024",
 };
 
 export const methodologySummary = `
