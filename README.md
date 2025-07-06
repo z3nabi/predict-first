@@ -35,25 +35,6 @@ cp .env.example .env
 # Generate a quiz from a paper URL
 ./generate_quiz.py --pdf-url "https://arxiv.org/pdf/2502.04675" --quiz-id "recursive-self-critique"
 ```
-
-Once generated, you'll need to add the quiz to the registry in `src/data/quizRegistry.js`.
-
-## Development
-
-For the nerds who want to tinker:
-
-```bash
-# Get it running
-npm install
-npm run dev
-
-# That's it! The rest is just standard React stuff.
-```
-
-Built with React, Tailwind, and Vite. No fancy backends or complicated setups.
-
-Happy predicting! 🚀
-
 ## Adding Figures to Quizzes 🎨
 
 Quizzes can now include illustrative images, for example a key chart from the paper.  A quiz file supports **three** optional placements:
@@ -103,3 +84,21 @@ export const questions = [
 ```
 
 That's it—refresh the dev server and the image will render in the designated spot.  Quizzes that omit these fields continue to work unchanged.
+
+## Development
+
+For the nerds who want to tinker:
+
+```bash
+# Get it running
+npm install
+npm run dev
+
+# That's it! The rest is just standard React stuff.
+```
+
+Built with React, Tailwind, and Vite. No fancy backends or complicated setups.
+
+Happy predicting! 🚀
+
+

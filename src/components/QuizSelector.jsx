@@ -22,7 +22,28 @@ const QuizSelector = () => {
   
   return (
     <div className="max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Choose a Quiz</h1>
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">Choose a Quiz</h1>
+      
+      <p className="text-center text-sm text-gray-600 mb-6">
+        Want to contribute a new quiz? Visit the{' '}
+        <a
+          href="https://github.com/z3nabi/predict-first"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          GitHub repo
+        </a>{' '}
+        and check out the{' '}
+        <a
+          href="https://github.com/z3nabi/predict-first/blob/main/scripts/generate_quiz.py"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          quiz-generator script
+        </a>.
+      </p>
       
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {quizRegistry.map((quiz) => (
