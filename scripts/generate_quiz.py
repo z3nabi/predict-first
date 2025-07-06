@@ -68,6 +68,18 @@ def generate_quiz_from_pdf_url(pdf_url, args):
     """Generate a quiz by sending the PDF URL directly to Claude API."""
     print(f"Sending PDF URL to Claude: {pdf_url}")
     
+    def arxiv_pdf_to_abs(link: str) -> str:
+        """Convert arXiv PDF link (e.g. https://arxiv.org/pdf/1234.5678 or .pdf) to the /abs/ page."""
+        if "arxiv.org" in link and "/pdf/" in link:
+            # Simple replacement
+            link = link.replace("/pdf/", "/abs/")
+            # Drop trailing .pdf if present
+            if link.endswith(".pdf"):
+                link = link[:-4]
+        return link
+
+    paper_link = arxiv_pdf_to_abs(pdf_url)
+    
     try:
         # Construct prompt text
         prompt_text = f"""
@@ -90,6 +102,7 @@ export const quizMetadata = {{
   id: "{args.quiz_id}",
   title: "[Paper Title, potentially abbreviated]",
   description: "Test your intuitions about [brief paper description]",
+  paperLink: "{paper_link}",
 }};
 
 export const methodologySummary = `

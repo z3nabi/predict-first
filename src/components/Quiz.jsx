@@ -205,6 +205,17 @@ const Quiz = () => {
       
       <p className="text-center text-gray-600 mt-1">{quizInfo?.description}</p>
       
+      {quizInfo?.paperLink && (
+        <a
+          href={quizInfo.paperLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-center text-blue-600 hover:text-blue-800 underline mt-1"
+        >
+          Read the paper ↗
+        </a>
+      )}
+      
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <div 
           className="flex justify-between items-center cursor-pointer" 

@@ -3,7 +3,8 @@
 export const quizMetadata = {
   id: "emergent-misalignment",
   title: "Emergent Misalignment Quiz",
-  description: "Test your knowledge of emergent behaviors and misalignment risks in modern AI systems.",
+  description: "Test your intuitions of emergent behaviors and misalignment risks in modern AI systems.",
+  paperLink: "https://arxiv.org/abs/2502.17424",
 };
 
 export const methodologySummary = `
