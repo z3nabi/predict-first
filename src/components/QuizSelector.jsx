@@ -32,7 +32,7 @@ const QuizSelector = () => {
           >
             <h2 className="text-xl font-bold mb-2 text-blue-700">{quiz.title}</h2>
             <p className="text-gray-600 mb-4">{quiz.description}</p>
-            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2 items-center justify-center">
               <Link 
                 to={`/quiz/${quiz.id}`}
                 className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-center"
