@@ -17,6 +17,7 @@ import re
 import anthropic
 from pathlib import Path
 from dotenv import load_dotenv
+from string import Template
 
 # Try to load environment variables from multiple possible locations
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -81,56 +82,128 @@ def generate_quiz_from_pdf_url(pdf_url, args):
     paper_link = arxiv_pdf_to_abs(pdf_url)
     
     try:
-        # Construct prompt text
-        prompt_text = f"""
-You are an expert at creating educational quizzes. I want you to create a quiz about a research paper that tests the reader's intuitions about the findings BEFORE they've read the paper. The use case here is geared towards understanding and testing intuitions about how AI models work, specifically for safety, and so predicting the outcome of concrete experiments.
+        # Construct prompt text using string.Template to avoid accidental f-string brace interpolation issues
+        prompt_template = Template("""
+You are an expert at creating educational quizzes. Your task is to create a quiz about a research paper that tests the reader's intuitions about the findings BEFORE they've read the paper. This is designed to help readers understand how their intuitions about AI systems (particularly regarding safety) compare to actual experimental results.
 
-Please analyze the attached PDF document and create:
-1. A brief methodology summary (2-3 paragraphs) that explains the paper's approach without revealing specific findings.
-2. 8-10 multiple-choice questions that test intuitions about the paper's findings.
-   - Each question should have 4-8 options with 1 correct answer.
-   - Questions should focus on the core findings from the paper.
-   - Include additional context about the question, e.g. outlining the specifics of the experiment. This will be shown to the user BEFORE they answer the questions.
-   - Include an explanation for why the correct answer is correct.
+## Deliverables
+
+Analyze the attached PDF document and create:
+
+### 1. Methodology Summary
+- Write 2-3 paragraphs explaining the paper's experimental approach and research questions
+- Describe WHAT was tested and HOW, but not the results
+- Avoid revealing findings, outcomes, or conclusions
+
+### 2. Quiz Questions (8-10 questions)
+
+Create multiple-choice questions with the following structure for each:
+
+**Question Components:**
+- **Question**: Focus on concrete experimental outcomes ("What happened when...?")
+- **Options**: Exactly 4 answer choices
+- **Correct Answer**: The actual finding from the paper
+- **Explanation**: Why this answer is correct (revealed after answering)
+- **Context**: Background information about the experimental setup
+
+## Critical Guidelines
+
+### Make Options Equally Plausible
+- Each incorrect option should represent a reasonable alternative hypothesis
+- Include a mix of: null results, opposite effects, partial effects, and different mechanisms
+- Ensure the correct answer doesn't stand out as more detailed, extreme, or specific
+
+### Balance Information Across Options
+- If one option includes specific numbers, all should include numbers
+- If one option describes a mechanism, all should describe mechanisms
+- Keep similar length and complexity across all options
+
+### Write Neutral Context Sections
+- Describe the experimental setup and methodology
+- Explain what was measured and how
+- DO NOT include information that hints at results
+- DO NOT use language that appears in any answer option
+- Keep context factual and procedural
+
+### Focus on Surprising or Non-Obvious Findings
+- Prioritize results that violate common intuitions
+- Choose findings where multiple outcomes were plausible
+- Test predictions about experimental results, not definitions or methods
+
+### Quality Checks
+Before finalizing each question, verify:
+1. Could someone deduce the answer from the context alone? (If yes, revise)
+2. Do all options seem equally likely to someone unfamiliar with the paper?
+3. Does the question test prediction of results rather than comprehension?
+4. Would an expert in the field find multiple options plausible?
+
+## Example Structure
+
+**Good Question Format:**
+- Question: "When [specific experimental setup], what was the observed effect on [measured outcome]?"
+- Context: Describes the experimental design without hinting at results
+- Options: Four distinctly different but plausible outcomes
+- Explanation: The actual finding and why it occurred
+
+**Avoid:**
+- Questions about definitions or terminology
+- Questions where context reveals the answer
+- Options that are obviously wrong or implausible
+- Abstract theoretical questions without concrete experimental backing
+
+## Output Format
 
 FORMAT YOUR RESPONSE AS A VALID JAVASCRIPT OBJECT with the following structure:
 
 ```javascript
-// {args.quiz_id}.js - Quiz data for [Paper Title]
+// $QUIZ_ID.js - Quiz data for [Paper Title]
 
-export const quizMetadata = {{
-  id: "{args.quiz_id}",
+export const quizMetadata = {
+  id: "$QUIZ_ID",
   title: "[Paper Title, potentially abbreviated]",
   description: "Test your intuitions about [brief paper description]",
-  paperLink: "{paper_link}",
-}};
+  paperLink: "$PAPER_LINK",
+};
 
 export const methodologySummary = `
-  [Your methodology summary here]
+  [Your methodology summary here - 2-3 paragraphs]
 `;
 
 export const questions = [
-  {{
+  {
     id: 1,
     question: "Question text?",
-    options: ["Option A", "Option B", "Option C", "Option D"],
+    options: [
+      "Option A", 
+      "Option B", 
+      "Option C", 
+      "Option D"
+    ],
     correctAnswer: "Option B",
     explanation: "Explanation of why Option B is correct...",
     context: "Additional context about this question..."
-  }},
-  // Additional questions...
+  },
+  // Additional questions (8-10 total)...
 ];
 ```
 
-Important:
-- Make sure your output is valid JavaScript that can be directly saved to a file
-- Don't include any additional explanations or comments in your response, just the JS object
-- Ensure proper escaping of special characters in the strings
-"""
+**Important:**
+- Output ONLY valid JavaScript that can be directly saved to a file
+- Don't include any additional explanations or comments outside the JS structure
+- Ensure proper escaping of special characters in strings
+- The quiz_id will be provided, or use a kebab-case version of the paper title
+- Include the actual arXiv or paper URL if available
+
+Remember: The goal is to reveal surprising findings and test genuine intuitions about how AI systems behave, not to trick readers with poorly constructed questions.
+""")
+
+        prompt_text = prompt_template.substitute(QUIZ_ID=args.quiz_id, PAPER_LINK=paper_link)
         
         # Create the message with the PDF URL
-        response = client.messages.create(
-            model="claude-opus-4-20250514",
+        # Use streaming to avoid connection time-outs and to provide progress feedback
+        collected_chunks = []  # Accumulate streamed text deltas here
+        with client.messages.stream(
+            model="claude-opus-4-1-20250805",
             max_tokens=4000,
             temperature=0.2,
             system="You are an expert at creating educational quizzes based on research papers.",
@@ -151,10 +224,39 @@ Important:
                         }
                     ]
                 }
-            ]
-        )
-        
-        return response.content[0].text
+            ],
+        ) as stream:
+            # Live progress indicator: count how many unique question IDs we've seen so far
+            question_ids_seen: set[int] = set()
+            buffer = ""  # Sliding window of recent text to search for new question IDs
+
+            for text in stream.text_stream:
+                collected_chunks.append(text)
+                buffer += text
+
+                # Look for patterns like "id: 1," or "id: 2," (with optional quotes/spaces)
+                for match in re.finditer(r"\b\"?id\"?\s*:\s*(\d+)", buffer):
+                    qid = int(match.group(1))
+                    if qid not in question_ids_seen:
+                        question_ids_seen.add(qid)
+                        # Carriage return (\r) rewrites the same line in-place
+                        if len(question_ids_seen) == 1:
+                            print(f"\rGenerated {len(question_ids_seen)} question", end="", flush=True)
+                        else:
+                            print(f"\rGenerated {len(question_ids_seen)} questions", end="", flush=True)
+
+                # Keep the buffer from growing indefinitely (keep last ~1000 chars)
+                if len(buffer) > 2000:
+                    buffer = buffer[-1000:]
+
+            # After streaming completes, ensure we move to a new line
+            print()
+
+        # Combine all the chunks into the final response text
+        response_text = "".join(collected_chunks)
+        print()  # Ensure a newline after streaming is complete
+
+        return response_text
     except Exception as e:
         print(f"Error generating quiz: {e}")
         return None
