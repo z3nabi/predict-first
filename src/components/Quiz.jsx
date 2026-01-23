@@ -14,7 +14,7 @@ const Quiz = () => {
   const [predictions, setPredictions] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [showMethodology, setShowMethodology] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(true);
   const [expandedContexts, setExpandedContexts] = useState({});
   const [questionStatus, setQuestionStatus] = useState({});
   const [isLoading, setIsLoading] = useState(true);
