@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, ArrowRight, RotateCcw, ChevronDown, ChevronUp, Info, Home } from 'lucide-react';
 import { loadQuizData, getQuizById } from '../data/quizRegistry';
 
 const Quiz = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromCollection = location.state?.fromCollection;
+  const collectionTitle = location.state?.collectionTitle;
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [predictions, setPredictions] = useState({});
@@ -216,8 +219,11 @@ const Quiz = () => {
     <div className="flex flex-col space-y-6 max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
       {/* Header: Back button on its own line (left-aligned) and title centered below */}
       <div className="mb-2">
-        <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center">
-          <Home className="h-4 w-4 mr-1" /> Back to Quizzes
+        <Link
+          to={fromCollection ? `/collection/${fromCollection}` : "/"}
+          className="text-blue-600 hover:text-blue-800 flex items-center"
+        >
+          <Home className="h-4 w-4 mr-1" /> {fromCollection ? `Back to ${collectionTitle || 'Collection'}` : 'Back to Quizzes'}
         </Link>
       </div>
       <h1 className="text-2xl font-bold text-center text-gray-800">{quizInfo?.title}</h1>
@@ -467,12 +473,12 @@ const Quiz = () => {
           </div>
           
           <div className="flex justify-between">
-            <Link 
-              to="/"
+            <Link
+              to={fromCollection ? `/collection/${fromCollection}` : "/"}
               className="flex items-center px-4 py-2 rounded-md"
               style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
             >
-              <Home className="mr-2 h-4 w-4" /> All Quizzes
+              <Home className="mr-2 h-4 w-4" /> {fromCollection ? collectionTitle || 'Collection' : 'All Quizzes'}
             </Link>
             <button
               onClick={handleReset}

@@ -130,6 +130,7 @@ const CollectionView = () => {
               <div className="mt-4 flex flex-col sm:flex-row gap-2 items-center justify-center">
                 <Link
                   to={`/quiz/${quiz.id}`}
+                  state={{ fromCollection: collectionId, collectionTitle: collection.title }}
                   className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-center"
                 >
                   Start Quiz
