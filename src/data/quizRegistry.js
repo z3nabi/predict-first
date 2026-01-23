@@ -5,12 +5,6 @@ import { quizMetadata as cotFaithfulnessMetadata } from './quizzes/cot-faithfuln
 import { quizMetadata as emergentMisalignment } from './quizzes/emergent-misalignment';
 import { quizMetadata as evalaware } from './quizzes/eval-aware';
 import { quizMetadata as riskdilemmas } from './quizzes/risk-dilemmas';
-import { quizMetadata as subliminallearning } from './quizzes/subliminal-learning';
-import { quizMetadata as subliminallearning2 } from './quizzes/subliminal-learning-2';
-import { quizMetadata as subliminallearning3 } from './quizzes/subliminal-learning-3';
-import { quizMetadata as subliminallearningoai } from './quizzes/subliminal-learning-oai';
-import { quizMetadata as subliminallearningoai5 } from './quizzes/subliminal-learning-oai5';
-import { quizMetadata as cotrewardhacking } from './quizzes/cot-reward-hacking';
 import { quizMetadata as sandbaggingdetection } from './quizzes/sandbagging-detection';
 import { quizMetadata as neuralchameleons } from './quizzes/neural-chameleons';
 import { quizMetadata as dec2025251207810 } from './quizzes/dec-2025-2512-07810';
@@ -29,12 +23,6 @@ export const quizRegistry = [
   emergentMisalignment,
   evalaware,
   riskdilemmas,
-  subliminallearning,
-  subliminallearning2,
-  subliminallearning3,
-  subliminallearningoai,
-  subliminallearningoai5,
-  cotrewardhacking,
   sandbaggingdetection,
   neuralchameleons,
   dec2025251207810,
@@ -62,25 +50,13 @@ export const loadQuizData = async (quizId) => {
         return import('./quizzes/cot-faithfulness');
       case 'emergent-misalignment':
         return import('./quizzes/emergent-misalignment');
-            case 'eval-aware':
+      case 'eval-aware':
         return import('./quizzes/eval-aware');
       case 'risk-dilemmas':
         return import('./quizzes/risk-dilemmas');
-      case 'subliminal-learning':
-        return import('./quizzes/subliminal-learning');
-      case 'subliminal-learning-2':
-        return import('./quizzes/subliminal-learning-2');
-      case 'subliminal-learning-3':
-        return import('./quizzes/subliminal-learning-3');
-      case 'subliminal-learning-oai':
-        return import('./quizzes/subliminal-learning-oai');
-      case 'subliminal-learning-oai5':
-        return import('./quizzes/subliminal-learning-oai5');
-      case 'cot-reward-hacking':
-        return import('./quizzes/cot-reward-hacking');
       case 'sandbagging-detection':
         return import('./quizzes/sandbagging-detection');
-            case 'neural-chameleons':
+      case 'neural-chameleons':
         return import('./quizzes/neural-chameleons');
       case 'dec-2025-2512-07810':
         return import('./quizzes/dec-2025-2512-07810');
@@ -100,11 +76,11 @@ export const loadQuizData = async (quizId) => {
         return import('./quizzes/dec-2025-2410-04332');
       case 'dec-2025-2512-09882':
         return import('./quizzes/dec-2025-2512-09882');
-default:
+      default:
         throw new Error(`Quiz with ID '${quizId}' not found`);
     }
   } catch (error) {
     console.error(`Error loading quiz data for '${quizId}':`, error);
     throw error;
   }
-}; 
+};
