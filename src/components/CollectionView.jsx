@@ -12,6 +12,9 @@ const CollectionView = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Scroll to top when loading a collection
+    window.scrollTo(0, 0);
+
     const loadCollection = async () => {
       try {
         const collectionData = getCollectionById(collectionId);

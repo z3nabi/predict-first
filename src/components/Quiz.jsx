@@ -61,7 +61,10 @@ const Quiz = () => {
     setQuestionStatus({});
     setExpandedContexts({});
     setError(null);
-    
+
+    // Scroll to top when loading a new quiz
+    window.scrollTo(0, 0);
+
     fetchQuizData();
   }, [quizId]);
   
