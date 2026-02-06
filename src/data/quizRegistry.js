@@ -16,6 +16,7 @@ import { quizMetadata as dec2025251219027 } from './quizzes/dec-2025-2512-19027'
 import { quizMetadata as dec2025251205648 } from './quizzes/dec-2025-2512-05648';
 import { quizMetadata as dec2025241004332 } from './quizzes/dec-2025-2410-04332';
 import { quizMetadata as dec2025251209882 } from './quizzes/dec-2025-2512-09882';
+import { quizMetadata as arxiv260119062 } from './quizzes/arxiv-2601-19062';
 
 // Registry of all available quizzes
 export const quizRegistry = [
@@ -34,6 +35,7 @@ export const quizRegistry = [
   dec2025251205648,
   dec2025241004332,
   dec2025251209882,
+  arxiv260119062,
 ];
 
 // Utility function to get quiz by ID
@@ -76,6 +78,8 @@ export const loadQuizData = async (quizId) => {
         return import('./quizzes/dec-2025-2410-04332');
       case 'dec-2025-2512-09882':
         return import('./quizzes/dec-2025-2512-09882');
+      case 'arxiv-2601-19062':
+        return import('./quizzes/arxiv-2601-19062');
       default:
         throw new Error(`Quiz with ID '${quizId}' not found`);
     }
